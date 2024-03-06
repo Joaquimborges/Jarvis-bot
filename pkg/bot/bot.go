@@ -3,7 +3,6 @@ package bot
 import (
 	"github.com/Joaquimborges/waitress/pkg/cmd"
 	"gopkg.in/telebot.v3"
-	"log"
 	"time"
 )
 
@@ -12,7 +11,7 @@ type Waitress struct {
 	commands cmd.WaitressCommands
 }
 
-func NewBot(token string) *Waitress {
+func NewBot(token string) (*Waitress, error) {
 	botConf := telebot.Settings{
 		Token:  token,
 		Poller: &telebot.LongPoller{Timeout: 10 * time.Second},
@@ -20,8 +19,7 @@ func NewBot(token string) *Waitress {
 
 	bot, err := telebot.NewBot(botConf)
 	if err != nil {
-		log.Fatal(err)
-		return nil
+		return nil, err
 	}
 
 	instance := Waitress{
@@ -29,7 +27,7 @@ func NewBot(token string) *Waitress {
 		commands: cmd.NewCommandsInstance(),
 	}
 	instance.setupRoutes()
-	return &instance
+	return &instance, nil
 }
 
 func (instance *Waitress) Start() {

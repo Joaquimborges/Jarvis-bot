@@ -26,7 +26,7 @@ func NewCommandsInstance() WaitressCommands {
 	return &commands{
 		menu:       menu,
 		inlineMenu: inlineMenu,
-		helpBtn:    menu.Text("Quais são os casos de uso?"),
+		helpBtn:    menu.Text("What are the use cases?"),
 	}
 }
 
