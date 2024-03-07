@@ -8,32 +8,31 @@ import (
 
 type WaitressCommands interface {
 	Start(c telebot.Context) error
-	//Menu(c telebot.Context) error
+	OnTextMessage(c telebot.Context) error
+	Menu(c telebot.Context) error
 	//HelpBtnResponse(c telebot.Context) error
-	//OnTextMessage(c telebot.Context) error
 	//HelpBtnInstance() *telebot.Btn
 }
 
-type commands struct {
+type Commands struct {
 	menu       *telebot.ReplyMarkup
 	inlineMenu *telebot.ReplyMarkup
-	helpBtn    telebot.Btn
 }
 
-func NewCommandsInstance() WaitressCommands {
+func NewCommandsInstance() *Commands {
 	menu := &telebot.ReplyMarkup{ResizeKeyboard: true}
 	inlineMenu := &telebot.ReplyMarkup{}
-	return &commands{
+	return &Commands{
 		menu:       menu,
 		inlineMenu: inlineMenu,
-		helpBtn:    menu.Text("What are the use cases?"),
 	}
 }
 
-func (command *commands) Start(c telebot.Context) error {
-	menu := command.menu
+func (cmd *Commands) Start(c telebot.Context) error {
+	menu := cmd.menu
 	menu.Reply(
-		menu.Row(command.helpBtn),
+		menu.Row(cmd.UsecaseBtn()),
+		menu.Row(cmd.pingServer()),
 	)
 	if c.Sender().Username == os.Getenv("ADMIN_USERNAME") {
 		return c.Send(
@@ -47,4 +46,8 @@ func (command *commands) Start(c telebot.Context) error {
 			c.Sender().
 				Username,
 		), menu)
+}
+
+func (cmd *Commands) OnTextMessage(c telebot.Context) error {
+	return c.Reply("thanks")
 }
