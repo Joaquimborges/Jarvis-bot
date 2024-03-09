@@ -8,5 +8,7 @@ func (cmd *Commands) Menu(c telebot.Context) error {
 		menu.Row(cmd.UsecaseBtn()),
 		menu.Row(cmd.pingServer()),
 	)
-	return c.Send(menu)
+	msg := c.Update().Message
+	msg.ReplyMarkup = menu
+	return c.Send(msg)
 }
