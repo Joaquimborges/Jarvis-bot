@@ -3,6 +3,6 @@ module github.com/Joaquimborges/waitress
 go 1.21
 
 require (
-	github.com/urfave/cli/v3 v3.0.0-alpha9 // indirect
-	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
+	github.com/sashabaranov/go-openai v1.20.2
+	gopkg.in/telebot.v3 v3.2.1
 )
