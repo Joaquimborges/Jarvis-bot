@@ -16,9 +16,10 @@ listen to the webhooks of the deployments that happen weekly.
 - [OpenAI API KEY](https://platform.openai.com/api-keys)
 
 ### Envs
- - BOT_TOKEN=
- - OPEN_AI_API_KEY=
- - OPEN_AI_MODEL=
+ - export BOT_TOKEN=
+ - export OPEN_AI_API_KEY=
+ - export OPEN_AI_MODEL=
+ - export ADMIN_USERNAME=
 
 ### Usage
 ```go
@@ -26,10 +27,24 @@ import "github.com/Joaquimborges/jarvis-bot/pkg/bot"
 
 
 func main() {
-   if bt, err := bot.NewBotWithEnv(); err != nil {
+   if jarvis, err := bot.NewBotWithEnv(); err != nil {
        //handle error 
    } else {
-      bt.Start()
+      log.Println("Bot running")
+      jarvis.Start()
    }
 }
 ```
+### execute
+```bash
+make run
+```
+### then
+![Screenshot 2024-03-10 at 12.17.17 AM.png](..%2F..%2FDesktop%2FScreenshot%202024-03-10%20at%2012.17.17%E2%80%AFAM.png)
+
+### Commands
+You can write any word or start with the command below:
+```sh
+ /jarvis
+```
+<img src="" alt="drawing" width="200"/>
