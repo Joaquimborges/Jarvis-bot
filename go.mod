@@ -1,4 +1,4 @@
-module github.com/Joaquimborges/waitress
+module github.com/Joaquimborges/jarvis-bot
 
 go 1.21
 

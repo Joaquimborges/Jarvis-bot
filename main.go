@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Joaquimborges/waitress/pkg/bot"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot"
 	"log"
 )
 

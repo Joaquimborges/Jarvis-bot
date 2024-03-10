@@ -9,20 +9,18 @@ import (
 )
 
 type Client struct {
-	BaseURl string
-	Rest    *http.Client
+	Rest *http.Client
 }
 
-func NewRestClient(baseURL string) *Client {
+func NewRestClient() *Client {
 	client := http.Client{Timeout: time.Second * 5}
 	return &Client{
-		BaseURl: baseURL,
-		Rest:    &client,
+		Rest: &client,
 	}
 }
 
-func (client *Client) Get(ctx context.Context, path string) ([]byte, error) {
-	response, err := client.Rest.Get(fmt.Sprintf("%s/%s", client.BaseURl, path))
+func (client *Client) Get(ctx context.Context, url string) ([]byte, error) {
+	response, err := client.Rest.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("unable to make GET request, %v", err)
 	}
