@@ -40,11 +40,13 @@ func main() {
 make run
 ```
 ### then
-![Screenshot 2024-03-10 at 12.17.17 AM.png](..%2F..%2FDesktop%2FScreenshot%202024-03-10%20at%2012.17.17%E2%80%AFAM.png)
+<img width="355" alt="Screenshot 2024-03-10 at 12 17 17 AM" src="https://github.com/Joaquimborges/Jarvis-bot/assets/57245781/11ae307e-3e3d-42d2-9558-50a8bd01cd8f">
 
 ### Commands
 You can write any word or start with the command below:
 ```sh
  /jarvis
 ```
-<img src="" alt="drawing" width="200"/>
+<img src="https://github.com/Joaquimborges/Jarvis-bot/assets/57245781/571de568-e2c3-4615-a8d4-334b1fb12707" alt="drawing" width="300"/>
+
+
