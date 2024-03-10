@@ -3,7 +3,8 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/Joaquimborges/waitress/pkg/open_ia"
+	"github.com/Joaquimborges/jarvis-bot/pkg/open_ia"
+	"github.com/Joaquimborges/jarvis-bot/pkg/usecase"
 	"gopkg.in/telebot.v3"
 	"os"
 	"strings"
@@ -16,18 +17,17 @@ type WaitressCommands interface {
 }
 
 type Commands struct {
-	menu       *telebot.ReplyMarkup
-	inlineMenu *telebot.ReplyMarkup
-	gpt        open_ia.OpenAI
+	menu    *telebot.ReplyMarkup
+	gpt     open_ia.OpenAI
+	usecase *usecase.JarvisUsecase
 }
 
-func NewCommandsInstance(gpt open_ia.OpenAI) *Commands {
+func NewCommandsInstance(gpt open_ia.OpenAI, usecase *usecase.JarvisUsecase) *Commands {
 	menu := &telebot.ReplyMarkup{ResizeKeyboard: true}
-	inlineMenu := &telebot.ReplyMarkup{}
 	return &Commands{
-		menu:       menu,
-		inlineMenu: inlineMenu,
-		gpt:        gpt,
+		menu:    menu,
+		gpt:     gpt,
+		usecase: usecase,
 	}
 }
 
@@ -35,7 +35,7 @@ func (cmd *Commands) Start(c telebot.Context) error {
 	menu := cmd.menu
 	menu.Reply(
 		menu.Row(cmd.UsecaseBtn()),
-		menu.Row(cmd.pingServer()),
+		menu.Row(cmd.PingServer()),
 	)
 	if c.Sender().Username == os.Getenv("ADMIN_USERNAME") {
 		return c.Send(
@@ -66,5 +66,5 @@ func (cmd *Commands) OnTextMessage(c telebot.Context) error {
 		}
 		return c.Send(gptContext)
 	}
-	return c.Send("wait")
+	return c.Send("wait", cmd.menu)
 }
