@@ -4,19 +4,30 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 )
 
-func (j *JarvisUsecase) WakeAllTestServers() error {
-	socketServer := os.Getenv("MACHINE_SOCKET_SERVER_URL")
-	machineAPI := os.Getenv("MACHINE_API_URL")
-	bossAPI := os.Getenv("BOSS_YM_API_URL")
+/*
+WakeAllTestServers It's a really cool feature that
+allows you to do a health check on your test or even prod servers.
+You just need a public route that only returns a valid status code.
+*/
+func (j *JarvisUsecase) WakeAllTestServers(urls ...string) error {
+	if urls == nil {
+		return errors.New("request without url")
+	}
 
 	respChan := make(chan interface{})
-
-	go j.makePingRequest(socketServer, respChan)
-	go j.makePingRequest(machineAPI, respChan)
-	go j.makePingRequest(bossAPI, respChan)
+	for _, url := range urls {
+		go func(url string, ch chan<- interface{}) {
+			bytes, err := j.client.Get(context.Background(), url)
+			if err != nil {
+				ch <- fmt.Errorf("%v, URL: %s", err, url)
+				return
+			}
+			ch <- bytes
+			return
+		}(url, respChan)
+	}
 
 	for {
 		select {
@@ -33,17 +44,4 @@ func (j *JarvisUsecase) WakeAllTestServers() error {
 		}
 		return nil
 	}
-}
-
-func (j *JarvisUsecase) makePingRequest(
-	url string,
-	ch chan interface{},
-) {
-	bytes, err := j.client.Get(context.Background(), url)
-	if err != nil {
-		ch <- fmt.Errorf("%v, URL: %s", err, url)
-		return
-	}
-	ch <- bytes
-	return
 }

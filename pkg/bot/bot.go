@@ -17,10 +17,13 @@ type Waitress struct {
 // NewBotWithEnv Use to instantiate when you have
 // the BOT_TOKEN variable accessible in the application.
 func NewBotWithEnv() (*Waitress, error) {
-	return NewBot(os.Getenv("BOT_TOKEN"))
+	return NewBot(
+		os.Getenv("BOT_TOKEN"),
+		os.Getenv("OPEN_AI_MODEL"),
+	)
 }
 
-func NewBot(token string) (*Waitress, error) {
+func NewBot(token, openAIModel string) (*Waitress, error) {
 	botConf := telebot.Settings{
 		Token:     token,
 		Poller:    &telebot.LongPoller{Timeout: 10 * time.Second},
@@ -35,7 +38,7 @@ func NewBot(token string) (*Waitress, error) {
 	instance := Waitress{
 		bot: bot,
 		commands: cmd.NewCommandsInstance(
-			open_ia.NewOpenIAClient(),
+			open_ia.NewOpenIAClient(openAIModel),
 			usecase.NewJarvisUsecase(),
 		),
 	}

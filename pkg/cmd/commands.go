@@ -58,8 +58,8 @@ func (cmd *Commands) OnTextMessage(c telebot.Context) error {
 	}
 
 	//The ask prefix is necessary to identify questions that will be redirected to GPT - OpenAI
-	if strings.HasPrefix(c.Message().Text, "ask ") {
-		message := strings.TrimPrefix(c.Message().Text, "ask ")
+	if strings.HasPrefix(c.Message().Text, "/ask ") {
+		message := strings.TrimPrefix(c.Message().Text, "/ask ")
 		gptContext, err := cmd.gpt.GetMessageContext(context.Background(), message)
 		if err != nil {
 			return c.Send(fmt.Sprintf("Error mounting context: %v", err))
