@@ -53,6 +53,7 @@ If you need to ask a direct question to the GPT chat, just write your question w
 ```bash
 /ask Who is the best in the NBA?
 ```
+<img src="https://github.com/Joaquimborges/Jarvis-bot/assets/57245781/27887e95-759d-4eed-a1e3-b8779b299fe7" alt="drawing" width="300"/>
 
 By the way, there are a few names missing from this list, lol.
 
