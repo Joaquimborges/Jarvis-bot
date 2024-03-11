@@ -13,20 +13,22 @@ type OpenAI interface {
 }
 
 type openIA struct {
-	client *openai.Client
+	client      *openai.Client
+	openIAModel string
 }
 
-func NewOpenIAClient() OpenAI {
+func NewOpenIAClient(openAIModel string) OpenAI {
 	return &openIA{
 		client: openai.NewClient(
 			os.Getenv("OPEN_IA_API_KEY"),
 		),
+		openIAModel: openAIModel,
 	}
 }
 
 func (o *openIA) GetMessageContext(ctx context.Context, query string) (string, error) {
 	message := o.buildNewUserMessage(query)
-	request := o.buildNewChatCompletionRequest(message)
+	request := o.buildNewChatCompletionRequest(message, o.openIAModel)
 
 	stream, err := o.client.CreateChatCompletionStream(ctx, request)
 	if err != nil {
@@ -56,9 +58,9 @@ func (*openIA) buildNewUserMessage(content string) []openai.ChatCompletionMessag
 	}
 }
 
-func (*openIA) buildNewChatCompletionRequest(message []openai.ChatCompletionMessage) openai.ChatCompletionRequest {
+func (*openIA) buildNewChatCompletionRequest(message []openai.ChatCompletionMessage, openAIModel string) openai.ChatCompletionRequest {
 	return openai.ChatCompletionRequest{
-		Model:     openai.GPT3Dot5Turbo,
+		Model:     openAIModel,
 		MaxTokens: 500,
 		Messages:  message,
 		Stream:    true,

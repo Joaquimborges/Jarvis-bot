@@ -49,4 +49,10 @@ You can write any word or start with the command below:
 ```
 <img src="https://github.com/Joaquimborges/Jarvis-bot/assets/57245781/571de568-e2c3-4615-a8d4-334b1fb12707" alt="drawing" width="300"/>
 
+If you need to ask a direct question to the GPT chat, just write your question with the suffix /ask.
+```bash
+/ask Who is the best in the NBA?
+```
+
+By the way, there are a few names missing from this list, lol.
 
