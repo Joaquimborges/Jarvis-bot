@@ -66,5 +66,11 @@ func (cmd *Commands) OnTextMessage(c telebot.Context) error {
 		}
 		return c.Send(gptContext)
 	}
+
+	if strings.HasPrefix(c.Text(), "/exchange") {
+		message := strings.TrimPrefix(c.Message().Text, "/exchange ")
+		resp := cmd.usecase.GetDayQuote(message)
+		return c.Send(resp)
+	}
 	return c.Send("wait", cmd.menu)
 }
