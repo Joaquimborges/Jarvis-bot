@@ -9,7 +9,6 @@ func main() {
 	if bt, err := bot.NewBotWithEnv(); err != nil {
 		log.Panic(err)
 	} else {
-		log.Println("Bot running")
 		bt.Start()
 	}
 }

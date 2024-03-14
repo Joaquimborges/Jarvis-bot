@@ -6,6 +6,7 @@ import (
 	"github.com/Joaquimborges/jarvis-bot/pkg/open_ia"
 	"github.com/Joaquimborges/jarvis-bot/pkg/usecase"
 	"gopkg.in/telebot.v3"
+	"log"
 	"os"
 	"strings"
 )
@@ -20,14 +21,19 @@ type Commands struct {
 	menu    *telebot.ReplyMarkup
 	gpt     open_ia.OpenAI
 	usecase *usecase.JarvisUsecase
+	logger  *log.Logger
 }
 
-func NewCommandsInstance(gpt open_ia.OpenAI, usecase *usecase.JarvisUsecase) *Commands {
+func NewCommandsInstance(
+	gpt open_ia.OpenAI,
+	usecase *usecase.JarvisUsecase,
+	logger *log.Logger) *Commands {
 	menu := &telebot.ReplyMarkup{ResizeKeyboard: true}
 	return &Commands{
 		menu:    menu,
 		gpt:     gpt,
 		usecase: usecase,
+		logger:  logger,
 	}
 }
 
@@ -38,6 +44,7 @@ func (cmd *Commands) Start(c telebot.Context) error {
 		menu.Row(cmd.PingServer()),
 	)
 	if c.Sender().Username == os.Getenv("ADMIN_USERNAME") {
+		cmd.logger.Println("start talking with JB")
 		return c.Send(
 			"It's always good to have you here",
 			menu,
@@ -70,6 +77,7 @@ func (cmd *Commands) OnTextMessage(c telebot.Context) error {
 	if strings.HasPrefix(c.Text(), "/exchange") {
 		message := strings.TrimPrefix(c.Message().Text, "/exchange ")
 		resp := cmd.usecase.GetDayQuote(message)
+		cmd.logger.Println("exchange usecase was called")
 		return c.Send(resp)
 	}
 	return c.Send("wait", cmd.menu)

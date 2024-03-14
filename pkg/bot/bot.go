@@ -5,6 +5,7 @@ import (
 	"github.com/Joaquimborges/jarvis-bot/pkg/open_ia"
 	"github.com/Joaquimborges/jarvis-bot/pkg/usecase"
 	"gopkg.in/telebot.v3"
+	"log"
 	"os"
 	"time"
 )
@@ -12,6 +13,7 @@ import (
 type Waitress struct {
 	bot      *telebot.Bot
 	commands *cmd.Commands
+	logger   *log.Logger
 }
 
 // NewBotWithEnv Use to instantiate when you have
@@ -35,18 +37,22 @@ func NewBot(token, openAIModel string) (*Waitress, error) {
 		return nil, err
 	}
 
+	logger := log.New(os.Stdout, "[Jarvis-bot] - ", log.LstdFlags)
 	instance := Waitress{
 		bot: bot,
 		commands: cmd.NewCommandsInstance(
 			open_ia.NewOpenIAClient(openAIModel),
 			usecase.NewJarvisUsecase(),
+			logger,
 		),
+		logger: logger,
 	}
 	instance.setupRoutes()
 	return &instance, nil
 }
 
 func (instance *Waitress) Start() {
+	instance.logger.Println("Jarvis is alive...")
 	instance.bot.Start()
 }
 
