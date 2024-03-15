@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Joaquimborges/jarvis-bot/pkg/bot"
+	_ "github.com/mattn/go-sqlite3"
 	"log"
 )
 

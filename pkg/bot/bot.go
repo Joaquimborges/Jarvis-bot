@@ -1,11 +1,14 @@
 package bot
 
 import (
-	"github.com/Joaquimborges/jarvis-bot/pkg/cmd"
-	"github.com/Joaquimborges/jarvis-bot/pkg/open_ia"
-	"github.com/Joaquimborges/jarvis-bot/pkg/usecase"
+	"database/sql"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot/config"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/cmd"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/usecase"
+	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/open_ia"
+	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository/expense_calculator"
 	"gopkg.in/telebot.v3"
-	"log"
 	"os"
 	"time"
 )
@@ -13,19 +16,60 @@ import (
 type Waitress struct {
 	bot      *telebot.Bot
 	commands *cmd.Commands
-	logger   *log.Logger
 }
 
 // NewBotWithEnv Use to instantiate when you have
 // the BOT_TOKEN variable accessible in the application.
 func NewBotWithEnv() (*Waitress, error) {
-	return NewBot(
+	return newBot(
 		os.Getenv("BOT_TOKEN"),
 		os.Getenv("OPEN_AI_MODEL"),
+		nil,
 	)
 }
 
-func NewBot(token, openAIModel string) (*Waitress, error) {
+// NewWithDatabase Use to instantiate when you need to use
+// and store data in database
+func NewWithDatabase(creatDbQuery ...constants.CreateDatabaseQuery) (*Waitress, error) {
+	database, er := InitDatabase()
+	if er != nil {
+		return nil, er
+	}
+	errChan := make(chan error)
+	for _, query := range creatDbQuery {
+		go syncDatabase(database, query, errChan)
+	}
+
+	for {
+		select {
+		case err := <-errChan:
+			if err != nil {
+				return nil, err
+			}
+		}
+		break
+	}
+	return newBot(
+		os.Getenv("BOT_TOKEN"),
+		os.Getenv("OPEN_AI_MODEL"),
+		database,
+	)
+}
+
+func syncDatabase(
+	db *sql.DB,
+	query constants.CreateDatabaseQuery,
+	erChan chan<- error,
+) {
+	_, err := db.Prepare(query.String())
+	if err != nil {
+		erChan <- err
+		return
+	}
+	return
+}
+
+func newBot(token, openAIModel string, database *sql.DB) (*Waitress, error) {
 	botConf := telebot.Settings{
 		Token:     token,
 		Poller:    &telebot.LongPoller{Timeout: 10 * time.Second},
@@ -37,22 +81,21 @@ func NewBot(token, openAIModel string) (*Waitress, error) {
 		return nil, err
 	}
 
-	logger := log.New(os.Stdout, "[Jarvis-bot] - ", log.LstdFlags)
+	expenseCalculatorRepository := expense_calculator.NewExpenseCalculatorRepository(database)
 	instance := Waitress{
 		bot: bot,
 		commands: cmd.NewCommandsInstance(
 			open_ia.NewOpenIAClient(openAIModel),
 			usecase.NewJarvisUsecase(),
-			logger,
+			expenseCalculatorRepository,
 		),
-		logger: logger,
 	}
 	instance.setupRoutes()
 	return &instance, nil
 }
 
 func (instance *Waitress) Start() {
-	instance.logger.Println("Jarvis is alive...")
+	config.Logger.Println("Jarvis is alive...")
 	instance.bot.Start()
 }
 

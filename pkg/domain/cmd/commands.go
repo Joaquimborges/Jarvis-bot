@@ -3,10 +3,11 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/Joaquimborges/jarvis-bot/pkg/open_ia"
-	"github.com/Joaquimborges/jarvis-bot/pkg/usecase"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/entities"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/usecase"
+	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/open_ia"
+	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository"
 	"gopkg.in/telebot.v3"
-	"log"
 	"os"
 	"strings"
 )
@@ -21,19 +22,19 @@ type Commands struct {
 	menu    *telebot.ReplyMarkup
 	gpt     open_ia.OpenAI
 	usecase *usecase.JarvisUsecase
-	logger  *log.Logger
+	dB      repository.ExpenseCalculator
 }
 
 func NewCommandsInstance(
 	gpt open_ia.OpenAI,
 	usecase *usecase.JarvisUsecase,
-	logger *log.Logger) *Commands {
+	dB repository.ExpenseCalculator) *Commands {
 	menu := &telebot.ReplyMarkup{ResizeKeyboard: true}
 	return &Commands{
 		menu:    menu,
 		gpt:     gpt,
 		usecase: usecase,
-		logger:  logger,
+		dB:      dB,
 	}
 }
 
@@ -44,7 +45,7 @@ func (cmd *Commands) Start(c telebot.Context) error {
 		menu.Row(cmd.PingServer()),
 	)
 	if c.Sender().Username == os.Getenv("ADMIN_USERNAME") {
-		cmd.logger.Println("start talking with JB")
+		//config.Logger.Println("start talking with JB")
 		return c.Send(
 			"It's always good to have you here",
 			menu,
@@ -77,8 +78,23 @@ func (cmd *Commands) OnTextMessage(c telebot.Context) error {
 	if strings.HasPrefix(c.Text(), "/exchange") {
 		message := strings.TrimPrefix(c.Message().Text, "/exchange ")
 		resp := cmd.usecase.GetDayQuote(message)
-		cmd.logger.Println("exchange usecase was called")
+		//config.Logger.Println("exchange usecase was called")
 		return c.Send(resp)
+	}
+
+	if strings.HasPrefix(c.Text(), "/save ") {
+		message := strings.TrimPrefix(c.Text(), "/save ")
+
+		data, err := entities.NewExpenseCalculatorBody(message)
+		if err != nil {
+			return c.Send(err.Error())
+		}
+
+		er := cmd.dB.Save(data)
+		if er != nil {
+			return c.Send(er.Error())
+		}
+		return c.Send("saved")
 	}
 	return c.Send("wait", cmd.menu)
 }
