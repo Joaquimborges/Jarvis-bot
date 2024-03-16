@@ -19,45 +19,52 @@ func NewExpenseCalculatorRepository(db *sql.DB) repository.ExpenseCalculator {
 
 func (c *calculator) Save(data *entities.ExpenseCalculatorBody) error {
 	defer c.closeDatabase()
-
-	tx, er := c.db.Begin()
-	if er != nil {
-		return er
-	}
-
+	tx := c.initDatabase()
 	stmt, err := tx.Prepare(constants.InsertExpense.String())
 	if err != nil {
 		return err
 	}
 	defer c.closeStatement(stmt, "Save()")
 
-	_, err = stmt.Exec(data.Amount, data.Date)
+	_, err = stmt.Exec(data.Name, data.Amount, data.Date)
 	if err != nil {
 		return err
 	}
 
-	er = tx.Commit()
+	er := tx.Commit()
 	if er != nil {
 		return er
 	}
 	return nil
 }
 
-func (c *calculator) Select(query string, id string) (*entities.ExpenseCalculatorBody, error) {
+func (c *calculator) Select(query string) ([]*entities.ExpenseCalculatorBody, error) {
 	defer c.closeDatabase()
-
-	stmt, err := c.db.Prepare(query)
+	tx := c.initDatabase()
+	rows, err := tx.Query(query)
 	if err != nil {
 		return nil, err
 	}
-	defer c.closeStatement(stmt, "Select()")
+	defer c.closeRows(rows, "Select()")
+	decode := make([]*entities.ExpenseCalculatorBody, 0)
+	var name, date string
+	var amount float64
 
-	var decode entities.ExpenseCalculatorBody
-	err = stmt.QueryRow(id).Scan(&decode)
-	if err != nil {
+	for rows.Next() {
+		if er := rows.Scan(&name, &amount, &date); er != nil {
+			return nil, er
+		}
+		decode = append(decode, &entities.ExpenseCalculatorBody{
+			Name:   name,
+			Amount: amount,
+			Date:   date,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-	return &decode, nil
+	return decode, nil
 }
 
 func (c *calculator) closeDatabase() {
@@ -71,12 +78,37 @@ func (c *calculator) closeDatabase() {
 	}
 }
 
+func (c *calculator) initDatabase() *sql.Tx {
+	tx, err := c.db.Begin()
+	if err != nil {
+		config.Logger.Panic(
+			fmt.Sprintf(
+				"expense_calculator.closeDatabase(): %v",
+				err,
+			))
+		return nil
+	}
+	return tx
+}
+
 func (*calculator) closeStatement(stmt *sql.Stmt, fn string) {
 	err := stmt.Close()
 	if err != nil {
 		config.Logger.Fatal(
 			fmt.Sprintf(
 				"expense_calculator_repository.%s.closeStatement(): %v",
+				fn,
+				err,
+			))
+	}
+}
+
+func (*calculator) closeRows(rows *sql.Rows, fn string) {
+	err := rows.Close()
+	if err != nil {
+		config.Logger.Fatal(
+			fmt.Sprintf(
+				"expense_calculator_repository.%s.closeRows(): %v",
 				fn,
 				err,
 			))

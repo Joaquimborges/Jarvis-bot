@@ -31,3 +31,4 @@ go.work
 .env.local
 
 jarvis.db
+*.DS_Store

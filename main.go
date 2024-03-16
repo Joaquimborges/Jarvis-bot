@@ -2,14 +2,21 @@ package main
 
 import (
 	"github.com/Joaquimborges/jarvis-bot/pkg/bot"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 )
 
 func main() {
-	if bt, err := bot.NewBotWithEnv(); err != nil {
+	bt, err := bot.NewWithDatabase(constants.ExpenseCalculatorCreateDatabaseQuery)
+	if err != nil {
 		log.Panic(err)
-	} else {
-		bt.Start()
+		return
 	}
+
+	if er := bt.SyncDatabase(); er != nil {
+		log.Panic(er)
+		return
+	}
+	bt.Start()
 }

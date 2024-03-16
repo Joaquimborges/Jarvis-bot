@@ -14,8 +14,10 @@ import (
 )
 
 type Waitress struct {
-	bot      *telebot.Bot
-	commands *cmd.Commands
+	bot          *telebot.Bot
+	commands     *cmd.Commands
+	database     *sql.DB
+	creatDbQuery []constants.CreateDatabaseQuery
 }
 
 // NewBotWithEnv Use to instantiate when you have
@@ -31,45 +33,25 @@ func NewBotWithEnv() (*Waitress, error) {
 // NewWithDatabase Use to instantiate when you need to use
 // and store data in database
 func NewWithDatabase(creatDbQuery ...constants.CreateDatabaseQuery) (*Waitress, error) {
-	database, er := InitDatabase()
+	database, er := InitDatabase("jarvis.db")
 	if er != nil {
 		return nil, er
 	}
-	errChan := make(chan error)
-	for _, query := range creatDbQuery {
-		go syncDatabase(database, query, errChan)
-	}
 
-	for {
-		select {
-		case err := <-errChan:
-			if err != nil {
-				return nil, err
-			}
-		}
-		break
-	}
 	return newBot(
 		os.Getenv("BOT_TOKEN"),
 		os.Getenv("OPEN_AI_MODEL"),
 		database,
+		creatDbQuery...,
 	)
 }
 
-func syncDatabase(
-	db *sql.DB,
-	query constants.CreateDatabaseQuery,
-	erChan chan<- error,
-) {
-	_, err := db.Prepare(query.String())
-	if err != nil {
-		erChan <- err
-		return
-	}
-	return
-}
-
-func newBot(token, openAIModel string, database *sql.DB) (*Waitress, error) {
+func newBot(
+	token,
+	openAIModel string,
+	database *sql.DB,
+	creatDbQuery ...constants.CreateDatabaseQuery,
+) (*Waitress, error) {
 	botConf := telebot.Settings{
 		Token:     token,
 		Poller:    &telebot.LongPoller{Timeout: 10 * time.Second},
@@ -85,10 +67,13 @@ func newBot(token, openAIModel string, database *sql.DB) (*Waitress, error) {
 	instance := Waitress{
 		bot: bot,
 		commands: cmd.NewCommandsInstance(
-			open_ia.NewOpenIAClient(openAIModel),
-			usecase.NewJarvisUsecase(),
-			expenseCalculatorRepository,
+			usecase.NewJarvisUsecase(
+				open_ia.NewOpenIAClient(openAIModel),
+				expenseCalculatorRepository,
+			),
 		),
+		database:     database,
+		creatDbQuery: creatDbQuery,
 	}
 	instance.setupRoutes()
 	return &instance, nil
@@ -97,6 +82,15 @@ func newBot(token, openAIModel string, database *sql.DB) (*Waitress, error) {
 func (instance *Waitress) Start() {
 	config.Logger.Println("Jarvis is alive...")
 	instance.bot.Start()
+}
+
+func (instance *Waitress) SyncDatabase() error {
+	for _, query := range instance.creatDbQuery {
+		if _, er := instance.database.Exec(string(query)); er != nil {
+			return er
+		}
+	}
+	return nil
 }
 
 func (instance *Waitress) setupRoutes() {

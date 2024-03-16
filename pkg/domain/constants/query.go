@@ -8,6 +8,8 @@ func (j JarvisDbQuery) String() string {
 
 const (
 	InsertExpense JarvisDbQuery = `INSERT INTO 
-    			expense (amount, created_at)
-				VALUES (?, ?)`
+    			expense (name, amount, created_at)
+				VALUES (?, ?, ?)`
+
+	GetAllExpense JarvisDbQuery = `SELECT name, amount, created_at FROM expense`
 )
