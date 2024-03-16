@@ -1,13 +1,10 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
-	"github.com/Joaquimborges/jarvis-bot/pkg/open_ia"
-	"github.com/Joaquimborges/jarvis-bot/pkg/usecase"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/usecase"
 	"gopkg.in/telebot.v3"
 	"os"
-	"strings"
 )
 
 type WaitressCommands interface {
@@ -18,15 +15,15 @@ type WaitressCommands interface {
 
 type Commands struct {
 	menu    *telebot.ReplyMarkup
-	gpt     open_ia.OpenAI
 	usecase *usecase.JarvisUsecase
 }
 
-func NewCommandsInstance(gpt open_ia.OpenAI, usecase *usecase.JarvisUsecase) *Commands {
+func NewCommandsInstance(
+	usecase *usecase.JarvisUsecase,
+) *Commands {
 	menu := &telebot.ReplyMarkup{ResizeKeyboard: true}
 	return &Commands{
 		menu:    menu,
-		gpt:     gpt,
 		usecase: usecase,
 	}
 }
@@ -38,6 +35,7 @@ func (cmd *Commands) Start(c telebot.Context) error {
 		menu.Row(cmd.PingServer()),
 	)
 	if c.Sender().Username == os.Getenv("ADMIN_USERNAME") {
+		//config.Logger.Println("start talking with JB")
 		return c.Send(
 			"It's always good to have you here",
 			menu,
@@ -56,21 +54,5 @@ func (cmd *Commands) OnTextMessage(c telebot.Context) error {
 		c.Message().Text == " " {
 		return c.Send("If you want to talk, write something more complete and starting with /ask")
 	}
-
-	//The ask prefix is necessary to identify questions that will be redirected to GPT - OpenAI
-	if strings.HasPrefix(c.Message().Text, "/ask ") {
-		message := strings.TrimPrefix(c.Message().Text, "/ask ")
-		gptContext, err := cmd.gpt.GetMessageContext(context.Background(), message)
-		if err != nil {
-			return c.Send(fmt.Sprintf("Error mounting context: %v", err))
-		}
-		return c.Send(gptContext)
-	}
-
-	if strings.HasPrefix(c.Text(), "/exchange") {
-		message := strings.TrimPrefix(c.Message().Text, "/exchange ")
-		resp := cmd.usecase.GetDayQuote(message)
-		return c.Send(resp)
-	}
-	return c.Send("wait", cmd.menu)
+	return c.Send(cmd.usecase.FindAndBuildUsecase(c.Text()))
 }

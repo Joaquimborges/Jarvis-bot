@@ -1,29 +1,57 @@
 package bot
 
 import (
-	"github.com/Joaquimborges/jarvis-bot/pkg/cmd"
-	"github.com/Joaquimborges/jarvis-bot/pkg/open_ia"
-	"github.com/Joaquimborges/jarvis-bot/pkg/usecase"
+	"database/sql"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot/config"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/cmd"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/usecase"
+	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/open_ia"
+	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository/expense_calculator"
 	"gopkg.in/telebot.v3"
 	"os"
 	"time"
 )
 
 type Waitress struct {
-	bot      *telebot.Bot
-	commands *cmd.Commands
+	bot          *telebot.Bot
+	commands     *cmd.Commands
+	database     *sql.DB
+	creatDbQuery []constants.CreateDatabaseQuery
 }
 
 // NewBotWithEnv Use to instantiate when you have
 // the BOT_TOKEN variable accessible in the application.
 func NewBotWithEnv() (*Waitress, error) {
-	return NewBot(
+	return newBot(
 		os.Getenv("BOT_TOKEN"),
 		os.Getenv("OPEN_AI_MODEL"),
+		nil,
 	)
 }
 
-func NewBot(token, openAIModel string) (*Waitress, error) {
+// NewWithDatabase Use to instantiate when you need to use
+// and store data in database
+func NewWithDatabase(creatDbQuery ...constants.CreateDatabaseQuery) (*Waitress, error) {
+	database, er := InitDatabase("jarvis.db")
+	if er != nil {
+		return nil, er
+	}
+
+	return newBot(
+		os.Getenv("BOT_TOKEN"),
+		os.Getenv("OPEN_AI_MODEL"),
+		database,
+		creatDbQuery...,
+	)
+}
+
+func newBot(
+	token,
+	openAIModel string,
+	database *sql.DB,
+	creatDbQuery ...constants.CreateDatabaseQuery,
+) (*Waitress, error) {
 	botConf := telebot.Settings{
 		Token:     token,
 		Poller:    &telebot.LongPoller{Timeout: 10 * time.Second},
@@ -35,19 +63,34 @@ func NewBot(token, openAIModel string) (*Waitress, error) {
 		return nil, err
 	}
 
+	expenseCalculatorRepository := expense_calculator.NewExpenseCalculatorRepository(database)
 	instance := Waitress{
 		bot: bot,
 		commands: cmd.NewCommandsInstance(
-			open_ia.NewOpenIAClient(openAIModel),
-			usecase.NewJarvisUsecase(),
+			usecase.NewJarvisUsecase(
+				open_ia.NewOpenIAClient(openAIModel),
+				expenseCalculatorRepository,
+			),
 		),
+		database:     database,
+		creatDbQuery: creatDbQuery,
 	}
 	instance.setupRoutes()
 	return &instance, nil
 }
 
 func (instance *Waitress) Start() {
+	config.Logger.Println("Jarvis is alive...")
 	instance.bot.Start()
+}
+
+func (instance *Waitress) SyncDatabase() error {
+	for _, query := range instance.creatDbQuery {
+		if _, er := instance.database.Exec(string(query)); er != nil {
+			return er
+		}
+	}
+	return nil
 }
 
 func (instance *Waitress) setupRoutes() {
