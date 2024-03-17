@@ -14,31 +14,21 @@ type WaitressCommands interface {
 }
 
 type Commands struct {
-	menu    *telebot.ReplyMarkup
-	usecase *usecase.JarvisUsecase
+	usecase usecase.UCBuilder
 }
 
 func NewCommandsInstance(
-	usecase *usecase.JarvisUsecase,
+	usecase usecase.UCBuilder,
 ) *Commands {
-	menu := &telebot.ReplyMarkup{ResizeKeyboard: true}
 	return &Commands{
-		menu:    menu,
 		usecase: usecase,
 	}
 }
 
 func (cmd *Commands) Start(c telebot.Context) error {
-	menu := cmd.menu
-	menu.Reply(
-		menu.Row(cmd.UsecaseBtn()),
-		menu.Row(cmd.PingServer()),
-	)
 	if c.Sender().Username == os.Getenv("ADMIN_USERNAME") {
-		//config.Logger.Println("start talking with JB")
 		return c.Send(
 			"It's always good to have you here",
-			menu,
 		)
 	}
 	return c.Send(
@@ -46,7 +36,7 @@ func (cmd *Commands) Start(c telebot.Context) error {
 			"Hi, %s",
 			c.Sender().
 				Username,
-		), menu)
+		))
 }
 
 func (cmd *Commands) OnTextMessage(c telebot.Context) error {
@@ -54,5 +44,6 @@ func (cmd *Commands) OnTextMessage(c telebot.Context) error {
 		c.Message().Text == " " {
 		return c.Send("If you want to talk, write something more complete and starting with /ask")
 	}
-	return c.Send(cmd.usecase.FindAndBuildUsecase(c.Text()))
+	context := cmd.usecase.BuildResponseContext(c.Text())
+	return c.Send(context)
 }

@@ -6,5 +6,6 @@ import (
 )
 
 var (
-	Logger = log.New(os.Stdout, "[Jarvis-bot] - ", log.LstdFlags)
+	Logger            = log.New(os.Stdout, "[Jarvis-bot] - ", log.LstdFlags)
+	TestServersToPing []string
 )

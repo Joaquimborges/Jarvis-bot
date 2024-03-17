@@ -6,8 +6,8 @@ import (
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/cmd"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/usecase"
-	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/open_ia"
-	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository/expense_calculator"
+	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/open_ai"
+	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/rest"
 	"gopkg.in/telebot.v3"
 	"os"
 )
@@ -18,8 +18,9 @@ type Jarvis struct {
 	database     *sql.DB
 	creatDbQuery []constants.CreateDatabaseQuery
 	err          error
-	openai       open_ia.OpenAI
+	openai       open_ai.OpenAI
 	parseMode    telebot.ParseMode
+	pingUrls     []string
 }
 
 func NewJarvisBot(options ...JarvisOptions) (*Jarvis, error) {
@@ -52,8 +53,12 @@ func NewJarvisBot(options ...JarvisOptions) (*Jarvis, error) {
 		}
 	}
 
-	expenseCalculatorRepository := expense_calculator.NewExpenseCalculatorRepository(params.database)
-	uc := usecase.NewJarvisUsecase(params.openai, expenseCalculatorRepository)
+	uc := usecase.NewJarvisUsecase(
+		params.openai,
+		params.database,
+		rest.NewRestClient(),
+		params.pingUrls...,
+	)
 	params.bot = bot
 	params.commands = cmd.NewCommandsInstance(uc)
 	params.setupRoutes()
@@ -75,11 +80,6 @@ func (instance *Jarvis) syncDatabase() error {
 }
 
 func (instance *Jarvis) setupRoutes() {
-	usecaseBtn := instance.commands.UsecaseBtn()
-	wakeServerBtn := instance.commands.PingServer()
-
 	instance.bot.Handle("/jarvis", instance.commands.Start)
-	instance.bot.Handle(&usecaseBtn, instance.commands.UsecaseResponse)
-	instance.bot.Handle(&wakeServerBtn, instance.commands.PingServersResponse)
 	instance.bot.Handle(telebot.OnText, instance.commands.OnTextMessage)
 }
