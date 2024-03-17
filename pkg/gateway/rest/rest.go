@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+//go:generate mockgen -source ./rest.go -destination ../../internal/mocks/gateway/restclient_mock.go -package mocks_gateway
 type Waitress interface {
 	Get(url string) ([]byte, error)
 }

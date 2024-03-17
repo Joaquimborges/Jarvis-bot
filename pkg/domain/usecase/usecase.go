@@ -16,6 +16,7 @@ const (
 	notFoundContextKey = "If you want to talk, write something more complete and starting with /ask ..."
 )
 
+//go:generate mockgen -source ./usecase.go -destination ../../internal/mocks/usecase/usecase_mock.go -package mocks_usecase
 type Usecase interface {
 	IsValid(message string) bool
 	BuildResponse(message string) string

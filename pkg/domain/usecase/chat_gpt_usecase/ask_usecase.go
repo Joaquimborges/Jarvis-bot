@@ -32,9 +32,7 @@ func (a *AskChatGpt) BuildResponse(message string) string {
 		)
 	}
 
-	if strings.HasPrefix(message, "/ask ") {
-		message = strings.TrimPrefix(message, "/ask ")
-	}
+	message = strings.TrimPrefix(message, "/ask ")
 	gptContext, err := a.gpt.GetMessageContext(context.Background(), message)
 	if err != nil {
 		return fmt.Sprintf("Error mounting context: %v", err)

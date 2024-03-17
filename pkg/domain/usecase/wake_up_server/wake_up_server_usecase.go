@@ -39,23 +39,19 @@ func (w *WakeServers) BuildResponse(_ string) string {
 				return
 			}
 			ch <- bytes
-			return
 		}(url, respChan)
 	}
 
 	for {
-		select {
-		case response := <-respChan:
-			switch response.(type) {
-			case error:
-				return response.(error).Error()
-			case []byte:
-				if response != nil {
-					return "The servers are ready"
-				}
-				return "the request may not have been successful"
+		response := <-respChan
+		switch resp := response.(type) {
+		case error:
+			return resp.Error()
+		case []byte:
+			if response != nil {
+				return "The servers are ready"
 			}
+			return "the request may not have been successful"
 		}
-		return "All good from here"
 	}
 }

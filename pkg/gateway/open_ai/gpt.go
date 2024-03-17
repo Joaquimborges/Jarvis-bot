@@ -8,6 +8,7 @@ import (
 	"os"
 )
 
+//go:generate mockgen -source ./gpt.go -destination ../../internal/mocks/gateway/openai_mock.go -package mocks_gateway
 type OpenAI interface {
 	GetMessageContext(ctx context.Context, query string) (string, error)
 }

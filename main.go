@@ -11,10 +11,7 @@ import (
 func main() {
 	bt, err := bot.NewJarvisBot(
 		bot.WithParseMode(telebot.ModeHTML),
-		bot.WithDatabase(
-			"jarvis.db",
-			constants.ExpenseCalculatorCreateDatabaseQuery,
-		),
+		bot.WithDatabase("jarvis.db", constants.ExpenseCalculatorCreateDatabaseQuery),
 	)
 	if err != nil {
 		log.Panic(err)

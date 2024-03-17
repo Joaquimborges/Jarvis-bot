@@ -10,10 +10,9 @@ import (
 func CreateNewStringLocalDate(locale string) string {
 	location, err := time.LoadLocation(locale)
 	if err != nil {
-		config.Logger.Println(
-			fmt.Sprintf("[util.CreateNewStringLocalDate()]: %v",
-				err,
-			),
+		config.Logger.Printf(
+			"[util.CreateNewStringLocalDate()]: %v",
+			err,
 		)
 	}
 
