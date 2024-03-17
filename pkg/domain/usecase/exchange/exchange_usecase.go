@@ -3,6 +3,7 @@ package exchange
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot/logger"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/rest"
 	"github.com/Joaquimborges/jarvis-bot/pkg/util"
@@ -63,6 +64,7 @@ func (e *Exchange) BuildResponse(message string) string {
 
 	flValue := e.parseToFloat(&response.Values)
 	date := strings.Split(response.Values.CreatedAt, " ")
+	logger.Usecase("Exchange")
 	return fmt.Sprintf(
 		"Here are the quotes: \n\npurchase: `R$%.2f\n`sale: `R$%.2f\n`This is the most that has come so far: `R$%.2f\n`the minimum: `R$%.2f\n`and had a variation of: `%s%%\n`date: %s\n`time: %s\n`",
 		flValue.purchaseQuote,

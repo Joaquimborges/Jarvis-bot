@@ -3,6 +3,7 @@ package expense_calculator_usecase
 import (
 	"database/sql"
 	"fmt"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot/logger"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository"
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository/expense_calculator"
@@ -53,5 +54,6 @@ func (f *FindAllExpenses) BuildResponse(_ string) string {
 			expense.Date,
 		)
 	}
+	logger.Usecase("FindAllExpenses")
 	return finalMsg
 }

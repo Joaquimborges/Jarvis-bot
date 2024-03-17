@@ -2,7 +2,7 @@ package bot
 
 import (
 	"database/sql"
-	"github.com/Joaquimborges/jarvis-bot/pkg/bot/config"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot/logger"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/cmd"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/usecase"
@@ -66,7 +66,7 @@ func NewJarvisBot(options ...JarvisOptions) (*Jarvis, error) {
 }
 
 func (instance *Jarvis) Start() {
-	config.Logger.Println("Jarvis is alive...")
+	logger.Info("Jarvis is alive...")
 	instance.bot.Start()
 }
 

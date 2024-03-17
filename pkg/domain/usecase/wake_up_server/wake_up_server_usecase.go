@@ -2,6 +2,7 @@ package wake_up_server
 
 import (
 	"fmt"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot/logger"
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/rest"
 	"github.com/Joaquimborges/jarvis-bot/pkg/util"
 )
@@ -49,6 +50,7 @@ func (w *WakeServers) BuildResponse(_ string) string {
 			return resp.Error()
 		case []byte:
 			if response != nil {
+				logger.Usecase("WakeServers")
 				return "The servers are ready"
 			}
 			return "the request may not have been successful"

@@ -3,6 +3,7 @@ package chat_gpt_usecase
 import (
 	"context"
 	"fmt"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot/logger"
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/open_ai"
 	"github.com/Joaquimborges/jarvis-bot/pkg/util"
 	"strings"
@@ -26,9 +27,10 @@ func (*AskChatGpt) IsValid(message string) bool {
 
 func (a *AskChatGpt) BuildResponse(message string) string {
 	if a.gpt == nil {
+		logger.Usecase("[AskChatGpt without import]")
 		return fmt.Sprintf(
 			"You forgot to import the openai dependency, use the %s option",
-			"bot.WithOpenAiIntegration(openAIModel string)",
+			"bot.WithOpenAiIntegration()",
 		)
 	}
 
@@ -37,5 +39,6 @@ func (a *AskChatGpt) BuildResponse(message string) string {
 	if err != nil {
 		return fmt.Sprintf("Error mounting context: %v", err)
 	}
+	logger.Usecase("[AskChatGpt]")
 	return gptContext
 }
