@@ -10,81 +10,62 @@ import (
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository/expense_calculator"
 	"gopkg.in/telebot.v3"
 	"os"
-	"time"
 )
 
-type Waitress struct {
+type Jarvis struct {
 	bot          *telebot.Bot
 	commands     *cmd.Commands
 	database     *sql.DB
 	creatDbQuery []constants.CreateDatabaseQuery
+	err          error
+	openai       open_ia.OpenAI
+	parseMode    telebot.ParseMode
 }
 
-// NewBotWithEnv Use to instantiate when you have
-// the BOT_TOKEN variable accessible in the application.
-func NewBotWithEnv() (*Waitress, error) {
-	return newBot(
-		os.Getenv("BOT_TOKEN"),
-		os.Getenv("OPEN_AI_MODEL"),
-		nil,
-	)
-}
-
-// NewWithDatabase Use to instantiate when you need to use
-// and store data in database
-func NewWithDatabase(creatDbQuery ...constants.CreateDatabaseQuery) (*Waitress, error) {
-	database, er := InitDatabase("jarvis.db")
-	if er != nil {
-		return nil, er
+func NewJarvisBot(options ...JarvisOptions) (*Jarvis, error) {
+	var params Jarvis
+	for _, opt := range options {
+		opt(&params)
 	}
 
-	return newBot(
-		os.Getenv("BOT_TOKEN"),
-		os.Getenv("OPEN_AI_MODEL"),
-		database,
-		creatDbQuery...,
-	)
-}
-
-func newBot(
-	token,
-	openAIModel string,
-	database *sql.DB,
-	creatDbQuery ...constants.CreateDatabaseQuery,
-) (*Waitress, error) {
-	botConf := telebot.Settings{
-		Token:     token,
-		Poller:    &telebot.LongPoller{Timeout: 10 * time.Second},
-		ParseMode: telebot.ModeMarkdown,
+	if params.err != nil {
+		return nil, params.err
 	}
 
-	bot, err := telebot.NewBot(botConf)
+	if params.parseMode == "" {
+		params.parseMode = telebot.ModeHTML
+	}
+
+	bot, err := telebot.NewBot(
+		buildBotSettings(
+			os.Getenv("BOT_TOKEN"),
+			params.parseMode,
+		),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	expenseCalculatorRepository := expense_calculator.NewExpenseCalculatorRepository(database)
-	instance := Waitress{
-		bot: bot,
-		commands: cmd.NewCommandsInstance(
-			usecase.NewJarvisUsecase(
-				open_ia.NewOpenIAClient(openAIModel),
-				expenseCalculatorRepository,
-			),
-		),
-		database:     database,
-		creatDbQuery: creatDbQuery,
+	if params.database != nil {
+		if er := params.syncDatabase(); er != nil {
+			return nil, er
+		}
 	}
-	instance.setupRoutes()
-	return &instance, nil
+
+	expenseCalculatorRepository := expense_calculator.NewExpenseCalculatorRepository(params.database)
+	uc := usecase.NewJarvisUsecase(params.openai, expenseCalculatorRepository)
+	params.bot = bot
+	params.commands = cmd.NewCommandsInstance(uc)
+	params.setupRoutes()
+	return &params, nil
 }
 
-func (instance *Waitress) Start() {
+func (instance *Jarvis) Start() {
 	config.Logger.Println("Jarvis is alive...")
 	instance.bot.Start()
 }
 
-func (instance *Waitress) SyncDatabase() error {
+func (instance *Jarvis) syncDatabase() error {
 	for _, query := range instance.creatDbQuery {
 		if _, er := instance.database.Exec(string(query)); er != nil {
 			return er
@@ -93,7 +74,7 @@ func (instance *Waitress) SyncDatabase() error {
 	return nil
 }
 
-func (instance *Waitress) setupRoutes() {
+func (instance *Jarvis) setupRoutes() {
 	usecaseBtn := instance.commands.UsecaseBtn()
 	wakeServerBtn := instance.commands.PingServer()
 
