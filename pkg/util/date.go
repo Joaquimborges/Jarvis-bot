@@ -2,7 +2,7 @@ package util
 
 import (
 	"fmt"
-	"github.com/Joaquimborges/jarvis-bot/pkg/bot/config"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot/logger"
 	"strings"
 	"time"
 )
@@ -10,9 +10,9 @@ import (
 func CreateNewStringLocalDate(locale string) string {
 	location, err := time.LoadLocation(locale)
 	if err != nil {
-		config.Logger.Printf(
+		logger.Info(
 			"[util.CreateNewStringLocalDate()]: %v",
-			err,
+			err.Error(),
 		)
 	}
 

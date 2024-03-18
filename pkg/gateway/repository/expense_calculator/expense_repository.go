@@ -2,7 +2,7 @@ package expense_calculator
 
 import (
 	"database/sql"
-	"github.com/Joaquimborges/jarvis-bot/pkg/bot/config"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot/logger"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/entities"
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository"
@@ -69,19 +69,20 @@ func (c *calculator) Select(query string) ([]*entities.ExpenseCalculatorBody, er
 func (c *calculator) closeDatabase() {
 	err := c.db.Close()
 	if err != nil {
-		config.Logger.Fatalf(
+		logger.Warn(
 			"expense_calculator.closeDatabase(): %v",
-			err,
+			err.Error(),
 		)
+		return
 	}
 }
 
 func (c *calculator) initDatabase() *sql.Tx {
 	tx, err := c.db.Begin()
 	if err != nil {
-		config.Logger.Panicf(
+		logger.Warn(
 			"expense_calculator.closeDatabase(): %v",
-			err,
+			err.Error(),
 		)
 		return nil
 	}
@@ -91,10 +92,10 @@ func (c *calculator) initDatabase() *sql.Tx {
 func (*calculator) closeStatement(stmt *sql.Stmt, fn string) {
 	err := stmt.Close()
 	if err != nil {
-		config.Logger.Fatalf(
+		logger.Warn(
 			"expense_calculator_repository.%s.closeStatement(): %v",
 			fn,
-			err,
+			err.Error(),
 		)
 	}
 }
@@ -102,10 +103,10 @@ func (*calculator) closeStatement(stmt *sql.Stmt, fn string) {
 func (*calculator) closeRows(rows *sql.Rows, fn string) {
 	err := rows.Close()
 	if err != nil {
-		config.Logger.Fatalf(
+		logger.Warn(
 			"expense_calculator_repository.%s.closeRows(): %v",
 			fn,
-			err,
+			err.Error(),
 		)
 	}
 }
