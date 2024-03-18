@@ -1,7 +1,7 @@
 ## Jarvis
 ### Install
 ```bash
-go get -u github.com/Joaquimborges/jarvis-bot
+go get -u github.com/Joaquimborges/jarvis-bot@latest
 ```
 
 ### Overview

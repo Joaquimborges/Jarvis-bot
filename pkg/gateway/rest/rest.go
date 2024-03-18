@@ -1,25 +1,29 @@
 package rest
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
 )
 
+//go:generate mockgen -source ./rest.go -destination ../../internal/mocks/gateway/restclient_mock.go -package mocks_gateway
+type Waitress interface {
+	Get(url string) ([]byte, error)
+}
+
 type Client struct {
 	Rest *http.Client
 }
 
-func NewRestClient() *Client {
+func NewRestClient() Waitress {
 	client := http.Client{Timeout: time.Second * 5}
 	return &Client{
 		Rest: &client,
 	}
 }
 
-func (client *Client) Get(ctx context.Context, url string) ([]byte, error) {
+func (client *Client) Get(url string) ([]byte, error) {
 	response, err := client.Rest.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("unable to make GET request, %v", err)

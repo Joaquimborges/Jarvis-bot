@@ -2,7 +2,7 @@ package bot
 
 import (
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
-	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/open_ia"
+	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/open_ai"
 	"gopkg.in/telebot.v3"
 	"time"
 )
@@ -22,7 +22,7 @@ func WithParseMode(parseMode telebot.ParseMode) JarvisOptions {
 // openai ChatGPT machine, you can find models reference here:https://openai.com/pricing
 func WithOpenAiIntegration(openAIModel string) JarvisOptions {
 	return func(j *Jarvis) *Jarvis {
-		j.openai = open_ia.NewOpenIAClient(openAIModel)
+		j.openai = open_ai.NewOpenIAClient(openAIModel)
 		return j
 	}
 }
@@ -38,6 +38,18 @@ func WithDatabase(databaseName string, creatDbQuery ...constants.CreateDatabaseQ
 		}
 		j.database = database
 		j.creatDbQuery = creatDbQuery
+		return j
+	}
+}
+
+/*
+WithPingServerURLs It's a really cool feature that
+allows you to do a health check on your test or even prod servers.
+You just need a public route that only returns a valid status code.
+*/
+func WithPingServerURLs(urls ...string) JarvisOptions {
+	return func(j *Jarvis) *Jarvis {
+		j.pingUrls = urls
 		return j
 	}
 }
