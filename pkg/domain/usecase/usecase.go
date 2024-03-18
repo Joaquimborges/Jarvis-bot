@@ -19,11 +19,11 @@ const (
 //go:generate mockgen -source ./usecase.go -destination ../../internal/mocks/usecase/usecase_mock.go -package mocks_usecase
 type Usecase interface {
 	IsValid(message string) bool
-	BuildResponse(message string) string
+	BuildResponse(message, sender string) string
 }
 
 type UCBuilder interface {
-	BuildResponseContext(message string) string
+	BuildResponseContext(message, sender string) string
 }
 
 type jarvisUsecase struct {
@@ -48,10 +48,10 @@ func NewJarvisUsecase(
 	}
 }
 
-func (uc *jarvisUsecase) BuildResponseContext(message string) string {
+func (uc *jarvisUsecase) BuildResponseContext(message, sender string) string {
 	for _, usecase := range uc.validUsecaseList {
 		if usecase.IsValid(message) {
-			return usecase.BuildResponse(message)
+			return usecase.BuildResponse(message, sender)
 		}
 	}
 	return notFoundContextKey

@@ -7,20 +7,23 @@ import (
 	"time"
 )
 
-func CreateNewStringLocalDate(locale string) string {
+func CreateLocalTime(locale string) time.Time {
 	location, err := time.LoadLocation(locale)
 	if err != nil {
-		logger.Info(
+		logger.Warn(
 			"[util.CreateNewStringLocalDate()]: %v",
 			err.Error(),
 		)
+		return time.Now()
 	}
+	return time.Now().In(location)
+}
 
-	now := time.Now().In(location)
+func ParseDate(date time.Time) string {
 	return fmt.Sprintf("%d-%s-%d",
-		now.Day(),
-		now.Month().String(),
-		now.Year(),
+		date.Day(),
+		date.Month().String(),
+		date.Year(),
 	)
 }
 

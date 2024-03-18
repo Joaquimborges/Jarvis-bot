@@ -26,7 +26,7 @@ func (*WakeServers) IsValid(message string) bool {
 	)
 }
 
-func (w *WakeServers) BuildResponse(_ string) string {
+func (w *WakeServers) BuildResponse(_, _ string) string {
 	if w.urls == nil || len(w.urls) < 1 {
 		return "You don't have any server URL"
 	}

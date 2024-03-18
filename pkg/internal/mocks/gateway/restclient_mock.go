@@ -52,3 +52,17 @@ func (mr *MockWaitressMockRecorder) Get(url any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockWaitress)(nil).Get), url)
 }
+
+// Post mocks base method.
+func (m *MockWaitress) Post(url string, body any, headers map[string]string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Post", url, body, headers)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Post indicates an expected call of Post.
+func (mr *MockWaitressMockRecorder) Post(url, body, headers any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Post", reflect.TypeOf((*MockWaitress)(nil).Post), url, body, headers)
+}

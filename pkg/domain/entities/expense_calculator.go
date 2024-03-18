@@ -4,15 +4,17 @@ import (
 	"github.com/Joaquimborges/jarvis-bot/pkg/util"
 	"os"
 	"strconv"
+	"time"
 )
 
 type ExpenseCalculatorBody struct {
-	Name   string
-	Amount float64
-	Date   string
+	Description string
+	Name        string
+	Amount      float64
+	Date        time.Time
 }
 
-func NewExpenseCalculatorBody(name, amount string) (*ExpenseCalculatorBody, error) {
+func NewExpenseCalculatorBody(name, amount, description string) (*ExpenseCalculatorBody, error) {
 	floatAmount, err := strconv.ParseFloat(amount, 64)
 	if err != nil {
 		return nil, err
@@ -21,9 +23,10 @@ func NewExpenseCalculatorBody(name, amount string) (*ExpenseCalculatorBody, erro
 	return &ExpenseCalculatorBody{
 			Name:   name,
 			Amount: floatAmount,
-			Date: util.CreateNewStringLocalDate(
+			Date: util.CreateLocalTime(
 				os.Getenv("TIME_LOCATION"),
 			),
+			Description: description,
 		},
 		nil
 }

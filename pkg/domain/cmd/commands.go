@@ -44,6 +44,9 @@ func (cmd *Commands) OnTextMessage(c telebot.Context) error {
 		c.Message().Text == " " {
 		return c.Send("If you want to talk, write something more complete and starting with /ask")
 	}
-	context := cmd.usecase.BuildResponseContext(c.Text())
+	context := cmd.usecase.BuildResponseContext(
+		c.Text(),
+		c.Sender().Username,
+	)
 	return c.Send(context)
 }

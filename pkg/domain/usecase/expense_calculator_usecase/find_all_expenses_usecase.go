@@ -33,7 +33,7 @@ func (*FindAllExpenses) IsValid(message string) bool {
 	)
 }
 
-func (f *FindAllExpenses) BuildResponse(_ string) string {
+func (f *FindAllExpenses) BuildResponse(_, _ string) string {
 	if f.database == nil {
 		return fmt.Sprintf(
 			"You forgot to import database dependency, \nuse the %s option",
@@ -48,10 +48,11 @@ func (f *FindAllExpenses) BuildResponse(_ string) string {
 	finalMsg := ""
 	for _, expense := range resp {
 		finalMsg += fmt.Sprintf(
-			"Description: %s\nAmount: R$%.2f\nDate: %s\n\n",
-			expense.Name,
+			"Description: %s\nAmount: R$%.2f\nDate: %s\nFrom: %s\n\n",
+			expense.Description,
 			expense.Amount,
-			expense.Date,
+			util.ParseDate(expense.Date),
+			expense.Name,
 		)
 	}
 	logger.Usecase("FindAllExpenses")

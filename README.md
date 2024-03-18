@@ -20,6 +20,8 @@ listen to the webhooks of the deployments that happen weekly.
  - export OPEN_AI_API_KEY=
  - export OPEN_AI_MODEL=
  - export ADMIN_USERNAME=
+ - export TIME_LOCATION=
+ - export CHAT_ID=
 
 ### Usage
 ```go
@@ -27,12 +29,17 @@ import "github.com/Joaquimborges/jarvis-bot/pkg/bot"
 
 
 func main() {
-   if jarvis, err := bot.NewBotWithEnv(); err != nil {
-       //handle error 
-   } else {
-      log.Println("Bot running")
-      jarvis.Start()
+   jarvis, err := bot.NewJarvisBot(
+           bot.WithParseMode(telebot.ModeHTML),
+           bot.WithDatabase("foo.db", 
+		 "create db statement",
+                 "other create db statement"...
+	   )
+   )
+   if err != nil {
+	//handle error
    }
+   jarvis.Start()
 }
 ```
 ### execute
