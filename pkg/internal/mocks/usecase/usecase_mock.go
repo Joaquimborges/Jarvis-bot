@@ -39,17 +39,17 @@ func (m *MockUsecase) EXPECT() *MockUsecaseMockRecorder {
 }
 
 // BuildResponse mocks base method.
-func (m *MockUsecase) BuildResponse(message string) string {
+func (m *MockUsecase) BuildResponse(message, sender string) string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "BuildResponse", message)
+	ret := m.ctrl.Call(m, "BuildResponse", message, sender)
 	ret0, _ := ret[0].(string)
 	return ret0
 }
 
 // BuildResponse indicates an expected call of BuildResponse.
-func (mr *MockUsecaseMockRecorder) BuildResponse(message any) *gomock.Call {
+func (mr *MockUsecaseMockRecorder) BuildResponse(message, sender any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildResponse", reflect.TypeOf((*MockUsecase)(nil).BuildResponse), message)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildResponse", reflect.TypeOf((*MockUsecase)(nil).BuildResponse), message, sender)
 }
 
 // IsValid mocks base method.
@@ -90,15 +90,15 @@ func (m *MockUCBuilder) EXPECT() *MockUCBuilderMockRecorder {
 }
 
 // BuildResponseContext mocks base method.
-func (m *MockUCBuilder) BuildResponseContext(message string) string {
+func (m *MockUCBuilder) BuildResponseContext(message, sender string) string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "BuildResponseContext", message)
+	ret := m.ctrl.Call(m, "BuildResponseContext", message, sender)
 	ret0, _ := ret[0].(string)
 	return ret0
 }
 
 // BuildResponseContext indicates an expected call of BuildResponseContext.
-func (mr *MockUCBuilderMockRecorder) BuildResponseContext(message any) *gomock.Call {
+func (mr *MockUCBuilderMockRecorder) BuildResponseContext(message, sender any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildResponseContext", reflect.TypeOf((*MockUCBuilder)(nil).BuildResponseContext), message)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildResponseContext", reflect.TypeOf((*MockUCBuilder)(nil).BuildResponseContext), message, sender)
 }
