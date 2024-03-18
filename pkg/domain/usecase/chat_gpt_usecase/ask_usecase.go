@@ -25,7 +25,7 @@ func (*AskChatGpt) IsValid(message string) bool {
 	)
 }
 
-func (a *AskChatGpt) BuildResponse(message string) string {
+func (a *AskChatGpt) BuildResponse(message, _ string) string {
 	if a.gpt == nil {
 		logger.Usecase("[AskChatGpt without import]")
 		return fmt.Sprintf(

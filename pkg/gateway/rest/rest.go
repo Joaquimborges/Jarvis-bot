@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,6 +12,7 @@ import (
 //go:generate mockgen -source ./rest.go -destination ../../internal/mocks/gateway/restclient_mock.go -package mocks_gateway
 type Waitress interface {
 	Get(url string) ([]byte, error)
+	Post(url string, body interface{}, headers map[string]string) error
 }
 
 type Client struct {
@@ -35,6 +38,33 @@ func (client *Client) Get(url string) ([]byte, error) {
 		}
 	}(response.Body)
 	return client.handleResponseError(response)
+}
+
+func (client *Client) Post(url string, body interface{}, headers map[string]string) error {
+	byts, bErr := json.Marshal(body)
+	if bErr != nil {
+		return bErr
+	}
+
+	bodyReader := bytes.NewReader(byts)
+	request, er := http.NewRequest(http.MethodPost, url, bodyReader)
+	if er != nil {
+		return er
+	}
+
+	for k, v := range headers {
+		request.Header.Add(k, v)
+	}
+	response, err := client.Rest.Do(request)
+	if err != nil {
+		return err
+	}
+
+	_, err = client.handleResponseError(response)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (client *Client) handleResponseError(response *http.Response) ([]byte, error) {

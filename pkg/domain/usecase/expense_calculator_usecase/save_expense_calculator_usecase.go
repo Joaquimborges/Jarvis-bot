@@ -36,7 +36,7 @@ func (*SaveExpense) IsValid(message string) bool {
 	)
 }
 
-func (s *SaveExpense) BuildResponse(message string) string {
+func (s *SaveExpense) BuildResponse(message, sender string) string {
 	if s.database == nil {
 		return fmt.Sprintf(
 			"You forgot to import database dependency, \nuse the %s option",
@@ -44,10 +44,10 @@ func (s *SaveExpense) BuildResponse(message string) string {
 		)
 	}
 
-	data := strings.Split(message, "/ ")
+	data := strings.Split(message, ", ")
 	amount := data[1]
-	name := data[2]
-	payload, err := entities.NewExpenseCalculatorBody(name, amount)
+	description := data[2]
+	payload, err := entities.NewExpenseCalculatorBody(sender, amount, description)
 	if err != nil {
 		return fmt.Sprintf("[usecase.NewExpenseCalculatorBody]Error was fount: %v", err)
 	}
@@ -58,6 +58,6 @@ func (s *SaveExpense) BuildResponse(message string) string {
 	logger.Usecase("SaveExpense")
 	return fmt.Sprintf("I just saved the amount: %s \nwith the name: %s \nin the external expenses list",
 		amount,
-		name,
+		description,
 	)
 }

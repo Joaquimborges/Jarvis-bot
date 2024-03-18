@@ -48,7 +48,7 @@ func (*Exchange) IsValid(message string) bool {
 	)
 }
 
-func (e *Exchange) BuildResponse(message string) string {
+func (e *Exchange) BuildResponse(message, _ string) string {
 	coin := e.getMessageCoin(message)
 	url := fmt.Sprintf("https://economia.awesomeapi.com.br/last/%s", coin)
 

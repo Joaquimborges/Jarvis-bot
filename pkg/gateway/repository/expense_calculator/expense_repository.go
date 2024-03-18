@@ -6,6 +6,7 @@ import (
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/entities"
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository"
+	"time"
 )
 
 type calculator struct {
@@ -25,7 +26,7 @@ func (c *calculator) Save(data *entities.ExpenseCalculatorBody) error {
 	}
 	defer c.closeStatement(stmt, "Save()")
 
-	_, err = stmt.Exec(data.Name, data.Amount, data.Date)
+	_, err = stmt.Exec(data.Name, data.Amount, data.Description, data.Date)
 	if err != nil {
 		return err
 	}
@@ -46,17 +47,18 @@ func (c *calculator) Select(query string) ([]*entities.ExpenseCalculatorBody, er
 	}
 	defer c.closeRows(rows, "Select()")
 	decode := make([]*entities.ExpenseCalculatorBody, 0)
-	var name, date string
+	var name, description, date string
 	var amount float64
 
 	for rows.Next() {
-		if er := rows.Scan(&name, &amount, &date); er != nil {
+		if er := rows.Scan(&name, &amount, &description, &date); er != nil {
 			return nil, er
 		}
 		decode = append(decode, &entities.ExpenseCalculatorBody{
-			Name:   name,
-			Amount: amount,
-			Date:   date,
+			Description: description,
+			Name:        name,
+			Amount:      amount,
+			Date:        c.parseTime(date),
 		})
 	}
 
@@ -64,6 +66,14 @@ func (c *calculator) Select(query string) ([]*entities.ExpenseCalculatorBody, er
 		return nil, err
 	}
 	return decode, nil
+}
+
+func (*calculator) parseTime(date string) time.Time {
+	dateTime, er := time.Parse(time.RFC3339, date)
+	if er != nil {
+		return time.Now()
+	}
+	return dateTime
 }
 
 func (c *calculator) closeDatabase() {
