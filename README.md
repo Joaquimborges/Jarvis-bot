@@ -3,7 +3,6 @@
 ```bash
 go get -u github.com/Joaquimborges/jarvis-bot@latest
 ```
-
 ### Overview
 Jarvis is a simple Telegram bot integrated with GPT from openAI.
 This project arose from a personal need to automate some tasks, 
