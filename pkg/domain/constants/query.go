@@ -11,5 +11,7 @@ const (
     			expense (name, amount, description, created_at)
 				VALUES (?, ?, ?, ?)`
 
-	GetAllExpense JarvisDbQuery = `SELECT name, amount, description, created_at FROM expense`
+	GetAllExpense            JarvisDbQuery = `SELECT name, amount, description, created_at FROM expense ORDER BY amount DESC`
+	GetExpenseByDateNumber   JarvisDbQuery = `SELECT name, amount, description, created_at FROM expense WHERE created_at BETWEEN ? AND ? ORDER BY amount DESC`
+	GetExpenseByDateAndOwner JarvisDbQuery = `SELECT name, amount, description, created_at FROM expense WHERE created_at BETWEEN ? AND ? AND name = ? ORDER BY amount DESC`
 )

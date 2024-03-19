@@ -18,7 +18,6 @@ func NewExpenseCalculatorRepository(db *sql.DB) repository.ExpenseCalculator {
 
 func (c *calculator) Save(data *entities.ExpenseCalculatorBody) error {
 	tx := c.initDatabase()
-	defer c.closeDatabase()
 	stmt, err := tx.Prepare(constants.InsertExpense.String())
 	if err != nil {
 		return err
@@ -37,10 +36,9 @@ func (c *calculator) Save(data *entities.ExpenseCalculatorBody) error {
 	return nil
 }
 
-func (c *calculator) Select(query string) ([]*entities.ExpenseCalculatorBody, error) {
+func (c *calculator) Select(query string, args ...any) ([]*entities.ExpenseCalculatorBody, error) {
 	tx := c.initDatabase()
-	defer c.closeDatabase()
-	rows, err := tx.Query(query)
+	rows, err := tx.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,17 +67,6 @@ func (c *calculator) Select(query string) ([]*entities.ExpenseCalculatorBody, er
 		return nil, err
 	}
 	return decode, nil
-}
-
-func (c *calculator) closeDatabase() {
-	err := c.db.Close()
-	if err != nil {
-		logger.Warn(
-			"expense_calculator.closeDatabase(): %v",
-			err.Error(),
-		)
-		return
-	}
 }
 
 func (c *calculator) initDatabase() *sql.Tx {

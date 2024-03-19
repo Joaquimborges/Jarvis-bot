@@ -3,6 +3,8 @@ package util
 import (
 	"fmt"
 	"github.com/Joaquimborges/jarvis-bot/pkg/bot/logger"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -17,6 +19,19 @@ func CreateLocalTime(locale string) time.Time {
 		return time.Now()
 	}
 	return time.Now().In(location)
+}
+
+func BuildComparableTime(days, months int) (now time.Time, then time.Time) {
+	now = time.Now()
+	then = now.AddDate(0, months, days)
+	return
+}
+
+func GetNumberValueFromMessage(message string) int {
+	re := regexp.MustCompile("[0-9]+")
+	str := re.FindAllString(message, -1)
+	n, _ := strconv.Atoi(str[0])
+	return n
 }
 
 func ParseDate(date time.Time) string {

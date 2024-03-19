@@ -11,30 +11,32 @@ import (
 	"github.com/Joaquimborges/jarvis-bot/pkg/util"
 )
 
-type FindAllExpenses struct {
+type FindExpensesByDaysAgo struct {
 	repository repository.ExpenseCalculator
 	database   *sql.DB
 }
 
-func NewFindAllExpenseUsecase(database *sql.DB) *FindAllExpenses {
-	return &FindAllExpenses{
+func NewFindExpensesByDaysAgoUsecase(database *sql.DB) *FindExpensesByDaysAgo {
+	return &FindExpensesByDaysAgo{
 		database:   database,
 		repository: expense_calculator.NewExpenseCalculatorRepository(database),
 	}
 }
 
-func (*FindAllExpenses) IsValid(message string) bool {
+func (*FindExpensesByDaysAgo) IsValid(message string) bool {
 	return util.ContainsValue(
 		message,
 		[]string{
-			"ver gastos",
-			"todos os gastos",
-			"expenses",
+			"dias atrás",
+			"dias atras",
+			"dia atrás",
+			"dia atras",
+			" days ago expenses",
 		},
 	)
 }
 
-func (f *FindAllExpenses) BuildResponse(_, _ string) string {
+func (f *FindExpensesByDaysAgo) BuildResponse(message, _ string) string {
 	if f.database == nil {
 		return fmt.Sprintf(
 			constants.ImportForgotMessage,
@@ -43,10 +45,12 @@ func (f *FindAllExpenses) BuildResponse(_, _ string) string {
 		)
 	}
 
-	resp, err := f.repository.Select(constants.GetAllExpense.String())
+	qtt := util.GetNumberValueFromMessage(message)
+	now, before := util.BuildComparableTime(-qtt, 0)
+	resp, err := f.repository.Select(constants.GetExpenseByDateNumber.String(), before, now)
 	if err != nil {
 		return fmt.Sprintf("[usecase.Select.all]Error was fount: %v", err)
 	}
-	logger.Usecase("FindAllExpenses")
+	logger.Usecase("FindExpensesByDaysAgo")
 	return common.BuildExpenseResponse(resp)
 }

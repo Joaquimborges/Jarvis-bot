@@ -44,6 +44,8 @@ func NewJarvisUsecase(
 			wake_up_server.NewWakeServersUsecase(client, testServerURLs...),
 			expense_calculator_usecase.NewSaveExpenseUsecase(database),
 			expense_calculator_usecase.NewFindAllExpenseUsecase(database),
+			expense_calculator_usecase.NewFindExpensesByMonthUsecase(database),
+			expense_calculator_usecase.NewFindExpensesByDaysAgoUsecase(database),
 		},
 	}
 }
