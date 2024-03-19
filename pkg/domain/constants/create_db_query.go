@@ -9,5 +9,5 @@ const (
     name TEXT NOT NULL,
     amount DOUBLE PRECISION NOT NULL,
     description TEXT NOT NULL,
-    created_at TIMESTAMP(0) NOT NULL DEFAULT 'NOW()')`
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP NOT NULL )`
 )

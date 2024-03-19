@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/Joaquimborges/jarvis-bot/pkg/bot/logger"
+	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/entities"
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository"
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/repository/expense_calculator"
@@ -39,12 +40,17 @@ func (*SaveExpense) IsValid(message string) bool {
 func (s *SaveExpense) BuildResponse(message, sender string) string {
 	if s.database == nil {
 		return fmt.Sprintf(
-			"You forgot to import database dependency, \nuse the %s option",
+			constants.ImportForgotMessage,
+			"database",
 			"bot.WithDatabase()",
 		)
 	}
 
 	data := strings.Split(message, ", ")
+	if len(data) < 3 {
+		return constants.InvalidExpenseUsecaseCharMessage
+	}
+
 	amount := data[1]
 	description := data[2]
 	payload, err := entities.NewExpenseCalculatorBody(sender, amount, description)
@@ -56,7 +62,7 @@ func (s *SaveExpense) BuildResponse(message, sender string) string {
 		return fmt.Sprintf("[usecase.SaveExpense()]Error was fount: %v", err)
 	}
 	logger.Usecase("SaveExpense")
-	return fmt.Sprintf("I just saved the amount: %s \nwith the name: %s \nin the external expenses list",
+	return fmt.Sprintf(constants.ExpenseSavedMessage,
 		amount,
 		description,
 	)

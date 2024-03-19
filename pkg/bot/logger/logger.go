@@ -10,17 +10,18 @@ var (
 	logger = log.New(os.Stdout, "[Jarvis-bot] - ", log.LstdFlags)
 )
 
-func Info(message string, tags ...string) {
-	msg := fmt.Sprintf(message, tags)
-	logger.Printf("[INFO] - %s", msg)
+func Info(message string, tags ...interface{}) {
+	logger.Printf("[INFO] - %s", format(message, tags...))
 }
 
-func Warn(message string, tags ...string) {
-	msg := fmt.Sprintf(message, tags)
-	logger.Printf("[WARN] - %s", msg)
+func Warn(message string, tags ...interface{}) {
+	logger.Printf("[WARN] - %s", format(message, tags...))
 }
 
 func Usecase(usecase string) {
-	message := fmt.Sprintf("SUCESSFULL CALLED USECASE: %s", usecase)
-	Info(message)
+	Info("SUCCESSFUL CALLED USECASE: %s", usecase)
+}
+
+func format(message string, tags ...interface{}) string {
+	return fmt.Sprintf(message, tags...)
 }
