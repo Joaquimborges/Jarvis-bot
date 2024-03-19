@@ -7,7 +7,10 @@ import (
 )
 
 func BuildExpenseResponse(data []*entities.ExpenseCalculatorBody) string {
-	result := ""
+	var (
+		total  float64
+		result string
+	)
 	for _, expense := range data {
 		result += fmt.Sprintf(
 			"Description: %s\nAmount: R$%.2f\nDate: %s\nFrom: %s\n#-------------------------#\n\n",
@@ -16,6 +19,8 @@ func BuildExpenseResponse(data []*entities.ExpenseCalculatorBody) string {
 			util.ParseDate(expense.Date),
 			expense.Name,
 		)
+		total += expense.Amount
 	}
+	result += fmt.Sprintf("#*------------*#\nTotal: R$%.2f\n#*----------*#", total)
 	return result
 }

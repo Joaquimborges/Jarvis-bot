@@ -54,16 +54,21 @@ func (mr *MockExpenseCalculatorMockRecorder) Save(data any) *gomock.Call {
 }
 
 // Select mocks base method.
-func (m *MockExpenseCalculator) Select(query string) ([]*entities.ExpenseCalculatorBody, error) {
+func (m *MockExpenseCalculator) Select(query string, args ...any) ([]*entities.ExpenseCalculatorBody, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Select", query)
+	varargs := []any{query}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Select", varargs...)
 	ret0, _ := ret[0].([]*entities.ExpenseCalculatorBody)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Select indicates an expected call of Select.
-func (mr *MockExpenseCalculatorMockRecorder) Select(query any) *gomock.Call {
+func (mr *MockExpenseCalculatorMockRecorder) Select(query any, args ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Select", reflect.TypeOf((*MockExpenseCalculator)(nil).Select), query)
+	varargs := append([]any{query}, args...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Select", reflect.TypeOf((*MockExpenseCalculator)(nil).Select), varargs...)
 }
