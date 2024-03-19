@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+var (
+	dateTimeRegexCompile = regexp.MustCompile("[0-9]+")
+	ExpenseRegexCompiler = regexp.MustCompile(`(?i)gastos|gastar`)
+)
+
 func CreateLocalTime(locale string) time.Time {
 	location, err := time.LoadLocation(locale)
 	if err != nil {
@@ -28,9 +33,14 @@ func BuildComparableTime(days, months int) (now time.Time, then time.Time) {
 }
 
 func GetNumberValueFromMessage(message string) int {
-	re := regexp.MustCompile("[0-9]+")
-	str := re.FindAllString(message, -1)
-	n, _ := strconv.Atoi(str[0])
+	strSlice := dateTimeRegexCompile.FindAllString(message, -1)
+	if len(strSlice) < 1 {
+		return 0
+	}
+	n, err := strconv.Atoi(strSlice[0])
+	if err != nil {
+		return 0
+	}
 	return n
 }
 
