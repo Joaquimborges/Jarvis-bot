@@ -3,7 +3,6 @@ package bot
 import (
 	"fmt"
 	"github.com/Joaquimborges/jarvis-bot/pkg/gateway/rest"
-	"gopkg.in/telebot.v3"
 	"os"
 )
 
@@ -16,14 +15,14 @@ type sendMessageBody struct {
 	DisableNotification bool   `json:"disable_notification"`
 }
 
-func SendMessage(message string, disableNotification bool) error {
+func SendMessage(message, parseMode string, disableNotification bool) error {
 	token := os.Getenv("BOT_TOKEN")
 	chatID := os.Getenv("CHAT_ID")
 	url := fmt.Sprintf(sendMessageURL, token)
 	body := sendMessageBody{
 		ChatID:              chatID,
 		Text:                message,
-		ParseMode:           telebot.ModeHTML,
+		ParseMode:           parseMode,
 		DisableNotification: disableNotification,
 	}
 

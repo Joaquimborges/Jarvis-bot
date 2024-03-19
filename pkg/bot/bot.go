@@ -19,8 +19,8 @@ type Jarvis struct {
 	creatDbQuery []constants.CreateDatabaseQuery
 	err          error
 	openai       open_ai.OpenAI
-	parseMode    telebot.ParseMode
 	pingUrls     []string
+	parseMode    telebot.ParseMode
 }
 
 func NewJarvisBot(options ...JarvisOptions) (*Jarvis, error) {

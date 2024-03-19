@@ -20,9 +20,13 @@ func WithParseMode(parseMode telebot.ParseMode) JarvisOptions {
 
 // WithOpenAiIntegration use it if you want to integrate with
 // openai ChatGPT machine, you can find models reference here:https://openai.com/pricing
-func WithOpenAiIntegration(openAIModel string) JarvisOptions {
+func WithOpenAiIntegration(openAIModel, openaiKey string, maxTokens int) JarvisOptions {
 	return func(j *Jarvis) *Jarvis {
-		j.openai = open_ai.NewOpenIAClient(openAIModel)
+		j.openai = open_ai.NewOpenIAClient(
+			openAIModel,
+			openaiKey,
+			maxTokens,
+		)
 		return j
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/sashabaranov/go-openai"
 	"io"
-	"os"
 )
 
 //go:generate mockgen -source ./gpt.go -destination ../../internal/mocks/gateway/openai_mock.go -package mocks_gateway
@@ -15,21 +14,23 @@ type OpenAI interface {
 
 type openIA struct {
 	client      *openai.Client
-	openIAModel string
+	openaiModel string
+	maxTokens   int
 }
 
-func NewOpenIAClient(openAIModel string) OpenAI {
+func NewOpenIAClient(openAIModel, openaiKey string, maxTokens int) OpenAI {
 	return &openIA{
 		client: openai.NewClient(
-			os.Getenv("OPEN_IA_API_KEY"),
+			openaiKey,
 		),
-		openIAModel: openAIModel,
+		maxTokens:   maxTokens,
+		openaiModel: openAIModel,
 	}
 }
 
 func (o *openIA) GetMessageContext(ctx context.Context, query string) (string, error) {
 	message := o.buildNewUserMessage(query)
-	request := o.buildNewChatCompletionRequest(message, o.openIAModel)
+	request := o.buildNewChatCompletionRequest(message)
 
 	stream, err := o.client.CreateChatCompletionStream(ctx, request)
 	if err != nil {
@@ -59,10 +60,10 @@ func (*openIA) buildNewUserMessage(content string) []openai.ChatCompletionMessag
 	}
 }
 
-func (*openIA) buildNewChatCompletionRequest(message []openai.ChatCompletionMessage, openAIModel string) openai.ChatCompletionRequest {
+func (o *openIA) buildNewChatCompletionRequest(message []openai.ChatCompletionMessage) openai.ChatCompletionRequest {
 	return openai.ChatCompletionRequest{
-		Model:     openAIModel,
-		MaxTokens: 500,
+		Model:     o.openaiModel,
+		MaxTokens: o.maxTokens,
 		Messages:  message,
 		Stream:    true,
 	}
