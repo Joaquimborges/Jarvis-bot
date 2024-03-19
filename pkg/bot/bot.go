@@ -3,6 +3,7 @@ package bot
 import (
 	"database/sql"
 	"github.com/Joaquimborges/jarvis-bot/pkg/bot/logger"
+	"github.com/Joaquimborges/jarvis-bot/pkg/bot/middleware"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/cmd"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/constants"
 	"github.com/Joaquimborges/jarvis-bot/pkg/domain/usecase"
@@ -81,5 +82,9 @@ func (instance *Jarvis) syncDatabase() error {
 
 func (instance *Jarvis) setupRoutes() {
 	instance.bot.Handle("/jarvis", instance.commands.Start)
-	instance.bot.Handle(telebot.OnText, instance.commands.OnTextMessage)
+	instance.bot.Handle(
+		telebot.OnText,
+		instance.commands.OnTextMessage,
+		middleware.ExpenseValidator,
+	)
 }
