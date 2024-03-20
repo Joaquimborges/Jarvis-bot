@@ -21,7 +21,7 @@ func CreateLocalTime(locale string) time.Time {
 			"[util.CreateNewStringLocalDate()]: %v",
 			err.Error(),
 		)
-		return time.Now()
+		return time.Now().UTC()
 	}
 	return time.Now().In(location)
 }
@@ -50,6 +50,10 @@ func ParseDate(date time.Time) string {
 		date.Month().String(),
 		date.Year(),
 	)
+}
+
+func SliceEnvs(value string) []string {
+	return strings.Split(value, "|")
 }
 
 func ContainsValue(message string, values []string) bool {
